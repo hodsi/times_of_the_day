@@ -9,7 +9,6 @@ YESHIVA_TIMES_URL_FORMAT = 'https://www.yeshiva.org.il/calendar/timestable?year=
                            'place_number} '
 DICT_JSON_FILE = 'place_dict.json'
 TIMES_TABLE_CLASS_NAME = 'holydayTableTimes'
-TIME_TO_SLEEP_BETWEEN_RETRIES = 0.5
 TABLE_BODY_CSS_SELECTOR = 'tbody'
 TABLE_ROW_CSS_SELECTOR = 'tr'
 TABLE_CELL_CSS_SELECTOR = 'td'
@@ -30,27 +29,28 @@ def get_times_as_titles_and_array(month, year, place):
         for i in range(TIMES_TO_FONT_SIZE_SMALLER):
             smaller_font_size_element.click()
         chrome_driver.execute_script(SCROLLING_DOWN_SCRIPT)
-        while True:
-            try:
-                times_day_table = chrome_driver.find_element_by_class_name(TIMES_TABLE_CLASS_NAME)
-                times_day_table_body = times_day_table.find_element_by_css_selector(TABLE_BODY_CSS_SELECTOR)
-                break
-            except NoSuchElementException:
-                sleep(TIME_TO_SLEEP_BETWEEN_RETRIES)
+        times_day_table = chrome_driver.find_element_by_class_name(TIMES_TABLE_CLASS_NAME)
+        times_day_table_body = times_day_table.find_element_by_css_selector(TABLE_BODY_CSS_SELECTOR)
         times_day_titles_element, *times_day_table_rows = times_day_table_body.find_elements_by_css_selector(
             TABLE_ROW_CSS_SELECTOR
         )
-        times_day_titles = [cell_element.text for cell_element in times_day_titles_element.find_elements_by_css_selector(
-            TABLE_CELL_CSS_SELECTOR
-        )]
+        times_day_titles = [cell_element.text for cell_element in
+                            times_day_titles_element.find_elements_by_css_selector(
+                                TABLE_CELL_CSS_SELECTOR
+                            )]
 
         times_day_array = []
 
         for times_row in times_day_table_rows:
-            times_day_array.append([times_cell.text for times_cell in times_row.find_elements_by_css_selector(
-                TABLE_CELL_CSS_SELECTOR
-            )])
+            times_day_array.append([
+                get_rid_of_quotes(times_cell.text) for times_cell in times_row.find_elements_by_css_selector(
+                    TABLE_CELL_CSS_SELECTOR
+                )])
     return times_day_titles, times_day_array
+
+
+def get_rid_of_quotes(text: str) -> str:
+    return text.replace('"', '').replace("'", '')
 
 
 @lru_cache(maxsize=1)
