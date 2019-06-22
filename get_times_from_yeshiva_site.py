@@ -1,9 +1,7 @@
 import json
 from functools import lru_cache
-from time import sleep
 
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
 
 YESHIVA_TIMES_URL_FORMAT = 'https://www.yeshiva.org.il/calendar/timestable?year={year}&month={month}&place={' \
                            'place_number} '
