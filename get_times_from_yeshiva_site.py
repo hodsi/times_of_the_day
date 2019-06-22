@@ -13,6 +13,9 @@ TIME_TO_SLEEP_BETWEEN_RETRIES = 0.5
 TABLE_BODY_CSS_SELECTOR = 'tbody'
 TABLE_ROW_CSS_SELECTOR = 'tr'
 TABLE_CELL_CSS_SELECTOR = 'td'
+SCROLLING_DOWN_SCRIPT = 'scroll(0, 300);'
+FONT_SMALLER_SIZE_CSS_SELECTOR = '[class="font-size small"]'
+TIMES_TO_FONT_SIZE_SMALLER = 13
 
 
 def get_times_as_titles_and_array(month, year, place):
@@ -23,9 +26,12 @@ def get_times_as_titles_and_array(month, year, place):
             place_number=convert_place_to_place_num(place)
         ))
         chrome_driver.maximize_window()
+        smaller_font_size_element = chrome_driver.find_element_by_css_selector(FONT_SMALLER_SIZE_CSS_SELECTOR)
+        for i in range(TIMES_TO_FONT_SIZE_SMALLER):
+            smaller_font_size_element.click()
+        chrome_driver.execute_script(SCROLLING_DOWN_SCRIPT)
         while True:
             try:
-                input('Press enter once you rendered all the table...')
                 times_day_table = chrome_driver.find_element_by_class_name(TIMES_TABLE_CLASS_NAME)
                 times_day_table_body = times_day_table.find_element_by_css_selector(TABLE_BODY_CSS_SELECTOR)
                 break
