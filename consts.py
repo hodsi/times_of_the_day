@@ -1,9 +1,14 @@
-FRIDAY_MINHA_TIME = '18:00'
-COME_SHABAT_TIME = '18:15'
 MORNING_LESSON_TIME = '4:30'
-MORNING_PRAYER_TIME = '7:30'
 FATHERS_AND_SONS_TIME = '16:15'
-NOON_LESSON_TIME = '16:45'
+
+DEFAULT_PLACE = 'רמת גן'
+DEFAULT_MONTH = None
+DEFAULT_YEAR = None
+
+COME_SHABAT_DIFF_FROM_MINHA = 15
+MORNING_PRAYER_DIFF_FROM_LESSON = 3 * 60
+NOON_LESSON_DIFF_FROM_FATHERS_AND_SONS = 30
+MINHA_TIME_BEFORE_SUN_SET = 40
 
 YESHIVA_TIMES_URL_FORMAT = 'https://www.yeshiva.org.il/calendar/timestable?year={year}&month={month_number}&place={' \
                            'place_number} '
@@ -14,6 +19,7 @@ TABLE_BODY_CSS_SELECTOR = 'tbody'
 TABLE_ROW_CSS_SELECTOR = 'tr'
 TABLE_CELL_CSS_SELECTOR = 'td'
 SCROLLING_DOWN_SCRIPT = 'scroll(0, 300);'
+SCROLLING_DOWN_SHABAT_SCRIPT = 'scroll(0, 1000);'
 FONT_SMALLER_SIZE_CSS_SELECTOR = '[class="font-size small"]'
 TIMES_TO_FONT_SIZE_SMALLER = 13
 LEAP_YEARS_MODULO = {0, 2, 5, 8, 11, 13, 16}
@@ -30,7 +36,7 @@ DAY_IN_MONTH = 'יום בחודש'
 DAY_IN_WEEK = 'יום בשבוע'
 WIERD_DATE = 'תאריך לועזי'
 PLAG = 'פלג המנחה'
-SUN_DOWN = 'שקיעה'
+SUN_SET = 'שקיעה'
 FIRST_SHMA = 'סו"ז ק"ש למג"א'
 SECOND_SHMA = 'סו"ז ק"ש לגר"א'
 
@@ -39,7 +45,7 @@ SHABAT = 'שבת'
 
 FIELD_TO_FILL = 'כלום'
 SEP = ','
-TIMES_OUTPUT_FILE = 'זמני שבת.csv'
+TIMES_OUTPUT_FILE_FORMAT = 'זמני שבת {month}.csv'
 
 LEAP_YEAR_MONTH_NUMBERS = {
     'תשרי': 1,

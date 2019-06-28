@@ -43,8 +43,7 @@ def get_shabat_times(place_number: int, year: int) -> Tuple[List[str], List[List
     with webdriver.Chrome() as chrome_driver:
         chrome_driver.get(consts.YESHIVA_SHABAT_URL_FORMAT.format(place_number=place_number, year=year))
         chrome_driver.maximize_window()
-        chrome_driver.execute_script(consts.SCROLLING_DOWN_SCRIPT)
-        chrome_driver.execute_script(consts.SCROLLING_DOWN_SCRIPT)
+        chrome_driver.execute_script(consts.SCROLLING_DOWN_SHABAT_SCRIPT)
         shabat_table = chrome_driver.find_element_by_id(consts.TIMES_TABLE_CLASS_NAME)
         shabat_table_body = shabat_table.find_element_by_css_selector(consts.TABLE_BODY_CSS_SELECTOR)
         shabat_titles_element, *shabat_table_rows = shabat_table_body.find_elements_by_css_selector(

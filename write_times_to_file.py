@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import consts
@@ -15,7 +15,7 @@ def get_last_month(month_number: int, year: int) -> Tuple[int, int]:
         if is_year_leaped(year):
             return max(consts.LEAP_YEAR_MONTH_NUMBERS.values()), year - 1
         return max(consts.NON_LEAP_YEAR_MONTH_NUMBERS.values()), year - 1
-    return month_number - 1, year - 1
+    return month_number - 1, year
 
 
 def put_quotes(un_quoted: str) -> str:
@@ -39,20 +39,32 @@ def is_shabat_in_month(shabat_times: List[str], titles: List[str], month: str) -
     return consts.SHABAT in shabat_date and month in shabat_date
 
 
-def calculate_minha_time(sun_set_time: str) -> str:
-    sun_set_datetime = datetime.strptime(sun_set_time, consts.TIME_FORMAT)
-    minha_time = sun_set_datetime - datetime.strptime('40', consts.MINUTES_FORMAT)
-    return str(minha_time)[:-3]
+def add_minutes_to_time(input_time: str, minutes_to_add: int) -> str:
+    input_datetime = datetime.strptime(input_time, consts.TIME_FORMAT)
+    ret_time = input_datetime + timedelta(minutes=minutes_to_add)
+    return ret_time.strftime(consts.TIME_FORMAT)
+
+
+def convert_plag_to_minha(plag_time: str) -> str:
+    plag_datetime = datetime.strptime(plag_time, consts.TIME_FORMAT)
+    ret_time = plag_datetime - timedelta(minutes=15 + plag_datetime.minute % 15)
+    return ret_time.strftime(consts.TIME_FORMAT)
+
+
+def calculate_minha_time(friday_times, titles):
+    plag_min_time = min(get_specific_time(friday_time, titles, consts.PLAG) for friday_time in friday_times)
+    return convert_plag_to_minha(plag_min_time)
+
 
 
 def convert_by_gimatria(word: str) -> int:
     return sum(consts.GIMATRIA_DICT.get(c, 0) for c in word)
 
 
-def main():
-    place = input('what place do you want to save the times of? ').strip()
-    month = input("what month's times? ").strip()
-    year = 5000 + convert_by_gimatria(input("what year's times? "))
+def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year=consts.DEFAULT_YEAR):
+    place = place or input('what place do you want to save the times of? ').strip()
+    month = month or input("what month's times? ").strip()
+    year = year or (5000 + convert_by_gimatria(input("what year's times? ")))
 
     month_number = convert_month_to_month_number(month, year)
     place_number = consts.PLACE_DICT[place]
@@ -81,7 +93,9 @@ def main():
             f'friday_times_len == {len(friday_times)}'
         )
 
-    with open(consts.TIMES_OUTPUT_FILE, 'w') as f:
+    friday_minha_time = calculate_minha_time(friday_times, times_titles)
+
+    with open(consts.TIMES_OUTPUT_FILE_FORMAT.format(month=month), 'w') as f:
         for i in range(len(shabat_times)):
             # פרשות
             f.write(get_specific_time(shabat_special_times[i], shabat_titles, consts.PARASHA) + consts.SEP)
@@ -93,19 +107,25 @@ def main():
             # תאריך לועזי
             f.write(get_specific_time(shabat_times[i], times_titles, consts.WIERD_DATE) + consts.SEP)
             # מנחה של שישי
-            f.write(consts.FRIDAY_MINHA_TIME + consts.SEP)
+            f.write(friday_minha_time + consts.SEP)
             # פלג המנחה
             f.write(get_specific_time(friday_times[i], times_titles, consts.PLAG) + consts.SEP)
             # בואי כלה
-            f.write(consts.COME_SHABAT_TIME + consts.SEP)
+            f.write(add_minutes_to_time(
+                friday_minha_time,
+                consts.COME_SHABAT_DIFF_FROM_MINHA
+            ) + consts.SEP)
             # הדלקת נרות
             f.write(get_specific_time(shabat_special_times[i], shabat_titles, consts.SHABAT_ENTER) + consts.SEP)
             # שקיעה
-            f.write(get_specific_time(friday_times[i], times_titles, consts.SUN_DOWN) + consts.SEP)
+            f.write(get_specific_time(friday_times[i], times_titles, consts.SUN_SET) + consts.SEP)
             # שיעור בוקר שבת
             f.write(consts.MORNING_LESSON_TIME + consts.SEP)
             # שחרית של שבת
-            f.write(consts.MORNING_PRAYER_TIME + consts.SEP)
+            f.write(add_minutes_to_time(
+                consts.MORNING_LESSON_TIME,
+                consts.MORNING_PRAYER_DIFF_FROM_LESSON
+            ) + consts.SEP)
 
             # סוף זמן ק"ש
             f.write(get_specific_time(shabat_times[i], times_titles, consts.FIRST_SHMA) + ' ')
@@ -114,10 +134,14 @@ def main():
             # אבות ובנים
             f.write(consts.FATHERS_AND_SONS_TIME + consts.SEP)
             # שיעור אחה"צ שבת
-            f.write(consts.NOON_LESSON_TIME + consts.SEP)
+            f.write(add_minutes_to_time(
+                consts.FATHERS_AND_SONS_TIME,
+                consts.NOON_LESSON_DIFF_FROM_FATHERS_AND_SONS
+            ) + consts.SEP)
             # מנחה של שבת
-            f.write(calculate_minha_time(
-                get_specific_time(shabat_times[i], times_titles, consts.SUN_DOWN)
+            f.write(add_minutes_to_time(
+                get_specific_time(shabat_times[i], times_titles, consts.SUN_SET),
+                -consts.MINHA_TIME_BEFORE_SUN_SET
             ) + consts.SEP)
             # צאת שבת רש"י
             f.write(get_specific_time(shabat_special_times[i], shabat_titles, consts.SHABAT_END) + consts.SEP)
