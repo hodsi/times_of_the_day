@@ -1,6 +1,15 @@
+FRIDAY_MINHA_TIME = '18:00'
+COME_SHABAT_TIME = '18:15'
+MORNING_LESSON_TIME = '4:30'
+MORNING_PRAYER_TIME = '7:30'
+FATHERS_AND_SONS_TIME = '16:15'
+NOON_LESSON_TIME = '16:45'
+
 YESHIVA_TIMES_URL_FORMAT = 'https://www.yeshiva.org.il/calendar/timestable?year={year}&month={month_number}&place={' \
                            'place_number} '
+YESHIVA_SHABAT_URL_FORMAT = 'https://www.yeshiva.org.il/calendar/shabatot?year={year}&place={place_number}'
 TIMES_TABLE_CLASS_NAME = 'holydayTableTimes'
+SHABAT_TABLE_ID = 'holydayTableTimes'
 TABLE_BODY_CSS_SELECTOR = 'tbody'
 TABLE_ROW_CSS_SELECTOR = 'tr'
 TABLE_CELL_CSS_SELECTOR = 'td'
@@ -9,6 +18,27 @@ FONT_SMALLER_SIZE_CSS_SELECTOR = '[class="font-size small"]'
 TIMES_TO_FONT_SIZE_SMALLER = 13
 LEAP_YEARS_MODULO = {0, 2, 5, 8, 11, 13, 16}
 LEAP_YEAR_MODULO_NUMBER = 17
+TIME_FORMAT = '%H:%M'
+MINUTES_FORMAT = '%M'
+
+DATE = 'תאריך'
+PARASHA = 'פרשת השבוע'
+SHABAT_ENTER = 'כניסת השבת והחג'
+SHABAT_END = 'יציאת השבת והחג'
+
+DAY_IN_MONTH = 'יום בחודש'
+DAY_IN_WEEK = 'יום בשבוע'
+WIERD_DATE = 'תאריך לועזי'
+PLAG = 'פלג המנחה'
+SUN_DOWN = 'שקיעה'
+FIRST_SHMA = 'סו"ז ק"ש למג"א'
+SECOND_SHMA = 'סו"ז ק"ש לגר"א'
+
+FRIDAY = 'שישי'
+SHABAT = 'שבת'
+
+FIELD_TO_FILL = 'כלום'
+SEP = ','
 
 LEAP_YEAR_MONTH_NUMBERS = {
     'תשרי': 1,
@@ -39,6 +69,31 @@ NON_LEAP_YEAR_MONTH_NUMBERS = {
     'תמוז': 10,
     'אב': 11,
     'אלול': 12
+}
+
+GIMATRIA_DICT = {
+    'א': 1,
+    'ב': 2,
+    'ג': 3,
+    'ד': 4,
+    'ה': 5,
+    'ו': 6,
+    'ז': 7,
+    'ח': 8,
+    'ט': 9,
+    'י': 10,
+    'כ': 20,
+    'ל': 30,
+    'מ': 40,
+    'נ': 50,
+    'ס': 60,
+    'ע': 70,
+    'פ': 80,
+    'צ': 90,
+    'ק': 100,
+    'ר': 200,
+    'ש': 300,
+    'ת': 400
 }
 
 PLACE_DICT = {
