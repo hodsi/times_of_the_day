@@ -81,7 +81,7 @@ def main():
             f'friday_times_len == {len(friday_times)}'
         )
 
-    with open('זמני שבת.csv', 'w') as f:
+    with open(consts.TIMES_OUTPUT_FILE, 'w') as f:
         for i in range(len(shabat_times)):
             # פרשות
             f.write(get_specific_time(shabat_special_times[i], shabat_titles, consts.PARASHA) + consts.SEP)

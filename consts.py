@@ -39,6 +39,7 @@ SHABAT = 'שבת'
 
 FIELD_TO_FILL = 'כלום'
 SEP = ','
+TIMES_OUTPUT_FILE = 'זמני שבת.csv'
 
 LEAP_YEAR_MONTH_NUMBERS = {
     'תשרי': 1,
