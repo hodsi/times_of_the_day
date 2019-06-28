@@ -56,9 +56,57 @@ def calculate_minha_time(friday_times, titles):
     return convert_plag_to_minha(plag_min_time)
 
 
-
 def convert_by_gimatria(word: str) -> int:
     return sum(consts.GIMATRIA_DICT.get(c, 0) for c in word)
+
+
+def get_fields_to_write(
+        friday_time,
+        shabat_time,
+        times_titles,
+        shabat_special_time,
+        shabat_titles,
+        month,
+        friday_minha_time
+):
+    # פרשות
+    yield get_specific_time(shabat_special_time, shabat_titles, consts.PARASHA)
+    # תאריך עברי
+    yield get_date_string(get_specific_time(shabat_time, times_titles, consts.DAY_IN_MONTH), month)
+    # תאריך לועזי
+    yield get_specific_time(shabat_time, times_titles, consts.WIERD_DATE)
+    # מנחה של שישי
+    yield friday_minha_time
+    # פלג המנחה
+    yield get_specific_time(friday_time, times_titles, consts.PLAG)
+    # בואי כלה
+    yield add_minutes_to_time(friday_minha_time, consts.COME_SHABAT_DIFF_FROM_MINHA)
+    # הדלקת נרות
+    yield get_specific_time(shabat_special_time, shabat_titles, consts.SHABAT_ENTER)
+    # שקיעה
+    yield get_specific_time(friday_time, times_titles, consts.SUN_SET)
+    # שיעור בוקר שבת
+    yield consts.MORNING_LESSON_TIME
+    # שחרית של שבת
+    yield add_minutes_to_time(consts.MORNING_LESSON_TIME, consts.MORNING_PRAYER_DIFF_FROM_LESSON)
+    # סוף זמן ק"ש
+    yield ' '.join([
+        get_specific_time(shabat_time, times_titles, consts.FIRST_SHMA),
+        get_specific_time(shabat_time, times_titles, consts.SECOND_SHMA)
+    ])
+    # אבות ובנים
+    yield consts.FATHERS_AND_SONS_TIME
+    # שיעור אחה"צ שבת
+    yield add_minutes_to_time(consts.FATHERS_AND_SONS_TIME, consts.NOON_LESSON_DIFF_FROM_FATHERS_AND_SONS)
+    # מנחה של שבת
+    yield add_minutes_to_time(
+        get_specific_time(shabat_time, times_titles, consts.SUN_SET),
+        -consts.MINHA_TIME_BEFORE_SUN_SET
+    )
+    # צאת שבת רש"י
+    yield get_specific_time(shabat_special_time, shabat_titles, consts.SHABAT_END)
+    # צאת שבת ר"ת
+    yield consts.FIELD_TO_FILL
 
 
 def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year=consts.DEFAULT_YEAR):
@@ -94,61 +142,20 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year=consts.DEF
         )
 
     friday_minha_time = calculate_minha_time(friday_times, times_titles)
+    lines_to_write = []
+    for i in range(len(shabat_times)):
+        lines_to_write.append(consts.SEP.join(get_fields_to_write(
+            friday_times[i],
+            shabat_times[i],
+            times_titles,
+            shabat_special_times[i],
+            shabat_titles,
+            month,
+            friday_minha_time
+        )))
 
     with open(consts.TIMES_OUTPUT_FILE_FORMAT.format(month=month), 'w') as f:
-        for i in range(len(shabat_times)):
-            # פרשות
-            f.write(get_specific_time(shabat_special_times[i], shabat_titles, consts.PARASHA) + consts.SEP)
-            # תאריך עברי
-            f.write(get_date_string(
-                get_specific_time(shabat_times[i], times_titles, consts.DAY_IN_MONTH),
-                month
-            ) + consts.SEP)
-            # תאריך לועזי
-            f.write(get_specific_time(shabat_times[i], times_titles, consts.WIERD_DATE) + consts.SEP)
-            # מנחה של שישי
-            f.write(friday_minha_time + consts.SEP)
-            # פלג המנחה
-            f.write(get_specific_time(friday_times[i], times_titles, consts.PLAG) + consts.SEP)
-            # בואי כלה
-            f.write(add_minutes_to_time(
-                friday_minha_time,
-                consts.COME_SHABAT_DIFF_FROM_MINHA
-            ) + consts.SEP)
-            # הדלקת נרות
-            f.write(get_specific_time(shabat_special_times[i], shabat_titles, consts.SHABAT_ENTER) + consts.SEP)
-            # שקיעה
-            f.write(get_specific_time(friday_times[i], times_titles, consts.SUN_SET) + consts.SEP)
-            # שיעור בוקר שבת
-            f.write(consts.MORNING_LESSON_TIME + consts.SEP)
-            # שחרית של שבת
-            f.write(add_minutes_to_time(
-                consts.MORNING_LESSON_TIME,
-                consts.MORNING_PRAYER_DIFF_FROM_LESSON
-            ) + consts.SEP)
-
-            # סוף זמן ק"ש
-            f.write(get_specific_time(shabat_times[i], times_titles, consts.FIRST_SHMA) + ' ')
-            f.write(get_specific_time(shabat_times[i], times_titles, consts.SECOND_SHMA) + consts.SEP)
-
-            # אבות ובנים
-            f.write(consts.FATHERS_AND_SONS_TIME + consts.SEP)
-            # שיעור אחה"צ שבת
-            f.write(add_minutes_to_time(
-                consts.FATHERS_AND_SONS_TIME,
-                consts.NOON_LESSON_DIFF_FROM_FATHERS_AND_SONS
-            ) + consts.SEP)
-            # מנחה של שבת
-            f.write(add_minutes_to_time(
-                get_specific_time(shabat_times[i], times_titles, consts.SUN_SET),
-                -consts.MINHA_TIME_BEFORE_SUN_SET
-            ) + consts.SEP)
-            # צאת שבת רש"י
-            f.write(get_specific_time(shabat_special_times[i], shabat_titles, consts.SHABAT_END) + consts.SEP)
-            # צאת שבת ר"ת
-            f.write(consts.FIELD_TO_FILL + consts.SEP)
-
-            f.write('\n')
+        f.write('\n'.join(lines_to_write))
 
 
 if __name__ == '__main__':
