@@ -29,11 +29,17 @@ def get_times_as_titles_and_array(month, year, place):
 
         for times_row in times_day_table_rows:
             times_day_array.append([
-                get_rid_of_quotes(times_cell.text) for times_cell in times_row.find_elements_by_css_selector(
+                _get_rid_of_quotes(times_cell.text) for times_cell in times_row.find_elements_by_css_selector(
                     consts.TABLE_CELL_CSS_SELECTOR
                 )])
     return times_day_titles, times_day_array
 
 
-def get_rid_of_quotes(text: str) -> str:
+def _get_rid_of_quotes(text: str) -> str:
     return text.replace('"', '').replace("'", '')
+
+
+def _convert_month_to_month_number(month: str, year: int) -> int:
+    if year % consts.LEAP_YEAR_MODULO_NUMBER in consts.LEAP_YEARS_MODULO:
+        return consts.LEAP_YEAR_MONTH_NUMBERS[month]
+    return consts.NON_LEAP_YEAR_MONTH_NUMBERS[month]
