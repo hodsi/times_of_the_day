@@ -45,7 +45,8 @@ SHABAT = 'שבת'
 
 FIELD_TO_FILL = 'כלום'
 SEP = ','
-TIMES_OUTPUT_FILE_FORMAT = 'זמני שבת {month}.csv'
+TIMES_OUTPUT_FILE_FORMAT = 'זמני שבת {month} {year}.csv'
+THOUSANDS_OF_YEARS_OFFSET = 5000
 
 LEAP_YEAR_MONTH_NUMBERS = {
     'תשרי': 1,
@@ -102,6 +103,8 @@ GIMATRIA_DICT = {
     'ש': 300,
     'ת': 400
 }
+
+REVERSE_GIMATRIAA_DICT = {value: letter for letter, value in GIMATRIA_DICT.items()}
 
 PLACE_DICT = {
     'אופקים': '129',

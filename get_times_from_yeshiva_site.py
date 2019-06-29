@@ -1,13 +1,14 @@
-from typing import Tuple, List
+from typing import List
 
 from cachetools.func import lru_cache
 from selenium import webdriver
 
 import consts
+from time_of_day import TimeOfDay
 
 
 @lru_cache(maxsize=10)
-def get_times_as_titles_and_times(month_number: int, place_number: int, year: int) -> Tuple[List[str], List[List[str]]]:
+def get_times_as_time_of_day_list(month_number: int, place_number: int, year: int) -> List[TimeOfDay]:
     with webdriver.Chrome() as chrome_driver:
         chrome_driver.get(consts.YESHIVA_TIMES_URL_FORMAT.format(
             month_number=month_number,
@@ -29,17 +30,19 @@ def get_times_as_titles_and_times(month_number: int, place_number: int, year: in
                                 consts.TABLE_CELL_CSS_SELECTOR
                             )]
 
-        times_day_array = []
+        time_of_day_array = []
 
         for times_row in times_day_table_rows:
-            times_day_array.append([
+            time_of_day_array.append(TimeOfDay([
                 _get_rid_of_quotes(times_cell.text) for times_cell in times_row.find_elements_by_css_selector(
                     consts.TABLE_CELL_CSS_SELECTOR
-                )])
-    return times_day_titles, sorted(times_day_array, key=lambda x: x[times_day_titles.index(consts.DAY_IN_MONTH)])
+                )],
+                times_day_titles
+            ))
+    return time_of_day_array
 
 
-def get_shabat_times(place_number: int, year: int) -> Tuple[List[str], List[List[str]]]:
+def get_shabat_times(place_number: int, year: int) -> List[TimeOfDay]:
     with webdriver.Chrome() as chrome_driver:
         chrome_driver.get(consts.YESHIVA_SHABAT_URL_FORMAT.format(place_number=place_number, year=year))
         chrome_driver.maximize_window()
@@ -56,12 +59,14 @@ def get_shabat_times(place_number: int, year: int) -> Tuple[List[str], List[List
         shabat_array = []
 
         for times_row in shabat_table_rows:
-            shabat_array.append([
+            shabat_array.append(TimeOfDay([
                 _get_rid_of_quotes(times_cell.text) for times_cell in times_row.find_elements_by_css_selector(
                     consts.TABLE_CELL_CSS_SELECTOR
-                )])
+                )],
+                shabat_titles
+            ))
 
-        return shabat_titles, shabat_array
+        return shabat_array
 
 
 def _get_rid_of_quotes(text: str) -> str:
