@@ -73,7 +73,7 @@ def get_shabat_times(place_number: int, year: int, driver=None) -> Tuple[List[st
         year_number=year
     ))
     if shabat_titles and shabat_array:
-        return shabat_titles, shabat_titles
+        return shabat_titles, shabat_array
     chrome_driver = driver or webdriver.Chrome()
     chrome_driver.get(consts.YESHIVA_SHABAT_URL_FORMAT.format(place_number=place_number, year=year))
     chrome_driver.maximize_window()

@@ -18,7 +18,7 @@ def safe_join_path(path: str, *paths: str):
 
 def main():
     with webdriver.Chrome() as driver:
-        for year in range(5779, 5790):
+        for year in range(5780, 5800 + 1):
             if is_year_leaped(year):
                 months_numbers = consts.LEAP_YEAR_MONTH_NUMBERS.values()
             else:
@@ -33,7 +33,7 @@ def main():
                 ))
                 with open(file_path, 'w') as f:
                     json.dump(time_day_list, f)
-                print(f'done with {month} month in {year} year')
+                print(f'done with {month} month out of {max(months_numbers)} in {year} year')
             _, shabat_times_list = get_shabat_times(place_number, year, driver)
             file_path = safe_join_path(consts.TIMES_FOLDER_FOR_CACHE, consts.SHABAT_SPECIAL_TIMES_FILE_FORMAT.format(
                 place_number=place_number,
