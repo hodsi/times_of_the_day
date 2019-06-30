@@ -23,19 +23,20 @@ def main():
                 months_numbers = consts.LEAP_YEAR_MONTH_NUMBERS.values()
             else:
                 months_numbers = consts.NON_LEAP_YEAR_MONTH_NUMBERS.values()
+            place_number = consts.PLACE_DICT[consts.DEFAULT_PLACE]
             for month in months_numbers:
-                _, time_day_list = get_times_as_titles_and_times(month, consts.DEFAULT_PLACE, year, driver)
+                _, time_day_list = get_times_as_titles_and_times(month, place_number, year, driver)
                 file_path = safe_join_path(consts.TIMES_FOLDER_FOR_CACHE, consts.TIMES_DAY_FILE_FORMAT.format(
-                    place_number=consts.DEFAULT_PLACE,
+                    place_number=place_number,
                     year_number=year,
                     month_number=month
                 ))
                 with open(file_path, 'w') as f:
                     json.dump(time_day_list, f)
                 print(f'done with {month} month in {year} year')
-            _, shabat_times_list = get_shabat_times(consts.DEFAULT_PLACE, year, driver)
+            _, shabat_times_list = get_shabat_times(place_number, year, driver)
             file_path = safe_join_path(consts.TIMES_FOLDER_FOR_CACHE, consts.SHABAT_SPECIAL_TIMES_FILE_FORMAT.format(
-                place_number=consts.DEFAULT_PLACE,
+                place_number=place_number,
                 year_number=year
             ))
             with open(file_path, 'w') as f:
