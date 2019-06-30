@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import consts
-from get_times_from_yeshiva_site import get_times_as_time_of_day_list, convert_month_to_month_number, is_year_leaped, \
-    get_shabat_times
+from get_times_from_yeshiva_site import get_times_as_titles_and_times, convert_month_to_month_number, is_year_leaped, \
+    get_shabat_times, convert_to_time_of_day
 from time_of_day import TimeOfDay
 
 
@@ -110,8 +110,8 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
     month_number = convert_month_to_month_number(month, year_number)
     place_number = consts.PLACE_DICT[place]
 
-    time_day_list = get_times_as_time_of_day_list(month_number, place_number, year_number)
-    shabat_times_list = get_shabat_times(place_number, year_number)
+    time_day_list = convert_to_time_of_day(*get_times_as_titles_and_times(month_number, place_number, year_number))
+    shabat_times_list = convert_to_time_of_day(*get_shabat_times(place_number, year_number))
     shabat_special_times = [one_shabat_times for one_shabat_times in shabat_times_list if is_shabat_in_month(
         one_shabat_times,
         month
@@ -122,7 +122,11 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
 
     if len(shabat_times) > len(friday_times):
         last_month_number, last_months_year = get_last_month(month_number, year_number)
-        last_month_times = get_times_as_time_of_day_list(last_month_number, place_number, last_months_year)
+        last_month_times = convert_to_time_of_day(*get_times_as_titles_and_times(
+            last_month_number,
+            place_number,
+            last_months_year
+        ))
         last_month_friday_times = get_specific_day_times(consts.FRIDAY, last_month_times)
         friday_times = [last_month_friday_times[-1], *friday_times]
 
