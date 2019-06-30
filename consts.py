@@ -48,6 +48,12 @@ SEP = ','
 TIMES_OUTPUT_FILE_FORMAT = 'זמני שבת {month} {year}.csv'
 THOUSANDS_OF_YEARS_OFFSET = 5000
 
+TIMES_FOLDER_FOR_CACHE = 'times_cache'
+TIMES_DAY_FILE_FORMAT = 'times_place={place_number}_year={year_number}_month={month_number}.json'
+TIMES_DAY_TITLES_FILE = 'times_titles.json'
+SHABAT_SPECIAL_TIMES_FILE_FORMAT = 'shabat_times_place={place_number}_year={year_number}.json'
+SHABAT_SPECIAL_TIMES_TITLES_FILE = 'shabat_titles.json'
+
 LEAP_YEAR_MONTH_NUMBERS = {
     'תשרי': 1,
     'חשון': 2,

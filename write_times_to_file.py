@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
+from selenium import webdriver
+
 import consts
 from get_times_from_yeshiva_site import get_times_as_titles_and_times, convert_month_to_month_number, is_year_leaped, \
     get_shabat_times, convert_to_time_of_day
@@ -110,8 +112,14 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
     month_number = convert_month_to_month_number(month, year_number)
     place_number = consts.PLACE_DICT[place]
 
-    time_day_list = convert_to_time_of_day(*get_times_as_titles_and_times(month_number, place_number, year_number))
-    shabat_times_list = convert_to_time_of_day(*get_shabat_times(place_number, year_number))
+    with webdriver.Chrome() as driver:
+        time_day_list = convert_to_time_of_day(*get_times_as_titles_and_times(
+            month_number,
+            place_number,
+            year_number,
+            driver
+        ))
+        shabat_times_list = convert_to_time_of_day(*get_shabat_times(place_number, year_number, driver))
     shabat_special_times = [one_shabat_times for one_shabat_times in shabat_times_list if is_shabat_in_month(
         one_shabat_times,
         month
