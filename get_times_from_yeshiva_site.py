@@ -9,7 +9,7 @@ from time_of_day import TimeOfDay
 
 
 def _get_rid_of_quotes(text: str) -> str:
-    return text.replace('"', '').replace("'", '')
+    return text.replace('"', '').replace("'", '').replace('(', '').replace(')', '')
 
 
 def load_json_from_file(file_path):
