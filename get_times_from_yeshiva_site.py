@@ -2,7 +2,6 @@ import json
 import os
 from typing import List, Tuple
 
-from cachetools.func import lru_cache
 from selenium import webdriver
 
 import consts
