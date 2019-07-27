@@ -16,7 +16,6 @@ def load_json_from_file(file_path):
             return json.load(f)
 
 
-@lru_cache(maxsize=10)
 def get_times_as_titles_and_times(
         month_number: int,
         place_number: int,
@@ -65,7 +64,6 @@ def get_times_as_titles_and_times(
     return times_day_titles, times_day_array
 
 
-@lru_cache(maxsize=10)
 def get_shabat_times(place_number: int, year: int, driver=None) -> Tuple[List[str], List[List[str]]]:
     shabat_titles = load_json_from_file(consts.SHABAT_SPECIAL_TIMES_TITLES_FILE)
     shabat_array = load_json_from_file(consts.SHABAT_SPECIAL_TIMES_FILE_FORMAT.format(
