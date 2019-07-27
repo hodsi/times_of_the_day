@@ -13,6 +13,9 @@ MINHA_TIME_BEFORE_SUN_SET = 40
 YESHIVA_TIMES_URL_FORMAT = 'https://www.yeshiva.org.il/calendar/timestable?year={year}&month={month_number}&place={' \
                            'place_number} '
 YESHIVA_SHABAT_URL_FORMAT = 'https://www.yeshiva.org.il/calendar/shabatot?year={year}&place={place_number}'
+YESHIVA_START_MONTHS_FORMAT = 'https://www.yeshiva.org.il/calendar/moladot?year={year}'
+
+MOLADOT_TIME_TABLE_CLASS_NAME = 'moladotTableTimes'
 TIMES_TABLE_CLASS_NAME = 'holydayTableTimes'
 SHABAT_TABLE_ID = 'holydayTableTimes'
 TABLE_BODY_CSS_SELECTOR = 'tbody'
@@ -53,6 +56,8 @@ TIMES_DAY_FILE_FORMAT = 'times_place={place_number}_year={year_number}_month={mo
 TIMES_DAY_TITLES_FILE = 'times_titles.json'
 SHABAT_SPECIAL_TIMES_FILE_FORMAT = 'shabat_times_place={place_number}_year={year_number}.json'
 SHABAT_SPECIAL_TIMES_TITLES_FILE = 'shabat_titles.json'
+MOLADOT_FILE_FORMAT = 'moladot_year={year_number}.json'
+MOLADOT_TITLES_FILE = 'moladot_titles.json'
 
 LEAP_YEAR_MONTH_NUMBERS = {
     'תשרי': 1,
