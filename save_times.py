@@ -5,7 +5,8 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
 import consts
-from get_times_from_yeshiva_site import is_year_leaped, get_times_as_titles_and_times, get_shabat_times
+from get_times_from_yeshiva_site import is_year_leaped, get_times_as_titles_and_times, get_shabat_times, \
+    get_start_of_months
 
 
 def safe_join_path(path: str, *paths: str):
@@ -40,12 +41,18 @@ def main():
                             json.dump(time_day_list, f)
                         print(f'done with {month} month out of {max(months_numbers)} in {year} year')
                     _, shabat_times_list = get_shabat_times(place_number, year, driver)
+                    _, moladot_list = get_start_of_months(year, driver)
                     file_path = safe_join_path(consts.TIMES_FOLDER_FOR_CACHE, consts.SHABAT_SPECIAL_TIMES_FILE_FORMAT.format(
                         place_number=place_number,
                         year_number=year
                     ))
                     with open(file_path, 'w') as f:
                         json.dump(shabat_times_list, f)
+                    file_path = safe_join_path(consts.TIMES_FOLDER_FOR_CACHE, consts.MOLADOT_FILE_FORMAT.format(
+                        year_number=year
+                    ))
+                    with open(file_path, 'w') as f:
+                        json.dump(moladot_list, f)
                     print(f'done with {year} year')
                     year += 1
         except NoSuchElementException:
