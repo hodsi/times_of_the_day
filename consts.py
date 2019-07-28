@@ -10,6 +10,9 @@ MORNING_PRAYER_DIFF_FROM_LESSON = 3 * 60
 NOON_LESSON_DIFF_FROM_FATHERS_AND_SONS = 30
 MINHA_TIME_BEFORE_SUN_SET = 40
 
+GOOD_DATE_FORMAT_LINE = -1
+BAD_DATE_FORMAT_LINE = 2
+
 YESHIVA_TIMES_URL_FORMAT = 'https://www.yeshiva.org.il/calendar/timestable?year={year}&month={month_number}&place={' \
                            'place_number} '
 YESHIVA_SHABAT_URL_FORMAT = 'https://www.yeshiva.org.il/calendar/shabatot?year={year}&place={place_number}'
@@ -37,7 +40,9 @@ SHABAT_END = 'יציאת השבת והחג'
 
 DAY_IN_MONTH = 'יום בחודש'
 DAY_IN_WEEK = 'יום בשבוע'
-WIERD_DATE = 'תאריך לועזי'
+WEIRD_DATE = 'תאריך לועזי'
+HEBREW_MONTH = 'חודש עברי'
+MOLADOT_TIME = 'זמן המולד'
 PLAG = 'פלג המנחה'
 SUN_SET = 'שקיעה'
 FIRST_SHMA = 'סו"ז ק"ש למג"א'
