@@ -1,5 +1,5 @@
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, WebDriverException
 
 import consts
 from file_utils import safe_join_path, dump_json_to_file
@@ -56,7 +56,7 @@ def main():
 
                     print(f'done with {year} year')
                     year += 1
-        except NoSuchElementException:
+        except [NoSuchElementException, WebDriverException]:
             pass
 
 
