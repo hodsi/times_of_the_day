@@ -53,6 +53,7 @@ SHABAT = 'שבת'
 
 FIELD_TO_FILL = 'כלום'
 SEP = ','
+TIMES_OUTPUT_FOLDER = 'times_output'
 TIMES_OUTPUT_FILE_FORMAT = 'זמני שבת {month} {year}.csv'
 THOUSANDS_OF_YEARS_OFFSET = 5000
 
