@@ -103,7 +103,7 @@ def get_times_as_titles_and_times(
     return times_day_titles, times_day_array
 
 
-def convert_to_time_of_day(titles, times_of_days):
+def convert_to_time_of_day(titles: List[str], times_of_days: List[List[str]]) -> List[TimeOfDay]:
     return [TimeOfDay(time_of_day, titles) for time_of_day in times_of_days]
 
 

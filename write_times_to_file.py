@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import List, Tuple
+from typing import List, Tuple, Iterable
 
 from selenium import webdriver
 
@@ -59,7 +59,7 @@ def is_shabat_in_month(shabat_times: TimeOfDay, month: str) -> bool:
     return consts.SHABAT in shabat_date and month in shabat_date
 
 
-def is_moladot_time_in_month(moladot_time: TimeOfDay, month: str) -> bool:
+def is_moladot_in_month(moladot_time: TimeOfDay, month: str) -> bool:
     return month == moladot_time[consts.HEBREW_MONTH]
 
 
@@ -106,7 +106,13 @@ def get_year_from_number(year_number: int) -> str:
     return year
 
 
-def get_fields_to_write(friday_time, shabat_time, shabat_special_time, month, friday_minha_time):
+def get_fields_to_write(
+        friday_time: TimeOfDay,
+        shabat_time: TimeOfDay,
+        shabat_special_time: TimeOfDay,
+        month: str,
+        friday_minha_time: str
+) -> Iterable[str]:
     # פרשות
     yield shabat_special_time[consts.PARASHA]
     # תאריך עברי
@@ -141,6 +147,71 @@ def get_fields_to_write(friday_time, shabat_time, shabat_special_time, month, fr
     yield consts.FIELD_TO_FILL
 
 
+def get_times_from_driver(
+        month: str,
+        month_number: int,
+        next_month: str,
+        place_number: int,
+        year_number: int
+) -> Tuple[List[TimeOfDay], TimeOfDay, List[TimeOfDay], List[TimeOfDay]]:
+    with webdriver.Chrome() as driver:
+        time_days = convert_to_time_of_day(*get_times_as_titles_and_times(
+            month_number,
+            place_number,
+            year_number,
+            driver
+        ))
+        shabat_time_days = convert_to_time_of_day(*get_shabat_times(place_number, year_number, driver))
+        moladot_time_days = convert_to_time_of_day(*get_start_of_months(year_number, driver))
+
+        shabat_special_times = [one_shabat_times for one_shabat_times in shabat_time_days if is_shabat_in_month(
+            one_shabat_times,
+            month
+        )]
+        month_moladot, = [molad for molad in moladot_time_days if is_moladot_in_month(molad, next_month)]
+
+        shabat_times = get_specific_day_times(consts.SHABAT, time_days)
+        friday_times = get_specific_day_times(consts.FRIDAY, time_days)
+
+        if len(shabat_times) > len(friday_times):
+            last_month_number, last_months_year = get_last_month(month_number, year_number)
+            last_month_times = convert_to_time_of_day(*get_times_as_titles_and_times(
+                last_month_number,
+                place_number,
+                last_months_year,
+                driver
+            ))
+            last_month_friday_times = get_specific_day_times(consts.FRIDAY, last_month_times)
+            friday_times = [last_month_friday_times[-1], *friday_times]
+    return friday_times, month_moladot, shabat_special_times, shabat_times
+
+
+def write_relevant_times_to_file(
+        friday_times: List[TimeOfDay],
+        month: str,
+        month_moladot: TimeOfDay,
+        shabat_special_times: List[TimeOfDay],
+        shabat_times: List[TimeOfDay],
+        year: str
+) -> None:
+    friday_minha_time = calculate_minha_time(friday_times)
+    lines_to_write = []
+    for i in range(len(shabat_times)):
+        lines_to_write.append(consts.SEP.join(get_fields_to_write(
+            friday_times[i],
+            shabat_times[i],
+            shabat_special_times[i],
+            month,
+            friday_minha_time
+        )))
+    lines_to_write.append(calculate_moladot_of_month(month_moladot))
+    with open(safe_join_path(
+            consts.TIMES_OUTPUT_FOLDER,
+            consts.TIMES_OUTPUT_FILE_FORMAT.format(month=month, year=year)
+    ), 'w') as f:
+        f.write('\n'.join(lines_to_write))
+
+
 def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=consts.DEFAULT_YEAR):
     place = place or input('what place do you want to save the times of? ').strip()
     month = month or input("what month's times? ").strip()
@@ -152,33 +223,13 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
     next_month = calculate_month_name(next_month_number, next_months_year)
     place_number = consts.PLACE_DICT[place]
 
-    with webdriver.Chrome() as driver:
-        time_day_list = convert_to_time_of_day(*get_times_as_titles_and_times(
-            month_number,
-            place_number,
-            year_number,
-            driver
-        ))
-        shabat_times_list = convert_to_time_of_day(*get_shabat_times(place_number, year_number, driver))
-        moladot_list = convert_to_time_of_day(*get_start_of_months(year_number, driver))
-    shabat_special_times = [one_shabat_times for one_shabat_times in shabat_times_list if is_shabat_in_month(
-        one_shabat_times,
-        month
-    )]
-    month_moladot, = [one_moladot for one_moladot in moladot_list if is_moladot_time_in_month(one_moladot, next_month)]
-
-    shabat_times = get_specific_day_times(consts.SHABAT, time_day_list)
-    friday_times = get_specific_day_times(consts.FRIDAY, time_day_list)
-
-    if len(shabat_times) > len(friday_times):
-        last_month_number, last_months_year = get_last_month(month_number, year_number)
-        last_month_times = convert_to_time_of_day(*get_times_as_titles_and_times(
-            last_month_number,
-            place_number,
-            last_months_year
-        ))
-        last_month_friday_times = get_specific_day_times(consts.FRIDAY, last_month_times)
-        friday_times = [last_month_friday_times[-1], *friday_times]
+    friday_times, month_moladot, shabat_special_times, shabat_times = get_times_from_driver(
+        month,
+        month_number,
+        next_month,
+        place_number,
+        year_number
+    )
 
     if not len(shabat_times) == len(shabat_special_times) == len(friday_times):
         raise Exception(
@@ -186,24 +237,7 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
             f'friday_times_len == {len(friday_times)}'
         )
 
-    friday_minha_time = calculate_minha_time(friday_times)
-    lines_to_write = []
-    for i in range(len(shabat_times)):
-        lines_to_write.append(consts.SEP.join(get_fields_to_write(
-            friday_times[i],
-            shabat_times[i],
-            shabat_special_times[i],
-            month,
-            friday_minha_time
-        )))
-
-    lines_to_write.append(calculate_moladot_of_month(month_moladot))
-
-    with open(safe_join_path(
-            consts.TIMES_OUTPUT_FOLDER,
-            consts.TIMES_OUTPUT_FILE_FORMAT.format(month=month, year=year)
-    ), 'w') as f:
-        f.write('\n'.join(lines_to_write))
+    write_relevant_times_to_file(friday_times, month, month_moladot, shabat_special_times, shabat_times, year)
 
 
 if __name__ == '__main__':
