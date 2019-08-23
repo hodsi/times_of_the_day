@@ -152,15 +152,13 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
     next_month = calculate_month_name(next_month_number, next_months_year)
     place_number = consts.PLACE_DICT[place]
 
-    with webdriver.Chrome() as driver:
-        time_day_list = convert_to_time_of_day(*get_times_as_titles_and_times(
-            month_number,
-            place_number,
-            year_number,
-            driver
-        ))
-        shabat_times_list = convert_to_time_of_day(*get_shabat_times(place_number, year_number, driver))
-        moladot_list = convert_to_time_of_day(*get_start_of_months(year_number, driver))
+    time_day_list = convert_to_time_of_day(*get_times_as_titles_and_times(
+        month_number,
+        place_number,
+        year_number,
+    ))
+    shabat_times_list = convert_to_time_of_day(*get_shabat_times(place_number, year_number))
+    moladot_list = convert_to_time_of_day(*get_start_of_months(year_number))
     shabat_special_times = [one_shabat_times for one_shabat_times in shabat_times_list if is_shabat_in_month(
         one_shabat_times,
         month
