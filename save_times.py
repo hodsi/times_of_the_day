@@ -1,21 +1,10 @@
-import json
-import os
-
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
 import consts
+from file_utils import safe_join_path, dump_json_to_file
 from get_times_from_yeshiva_site import is_year_leaped, get_times_as_titles_and_times, get_shabat_times, \
     get_start_of_months
-
-
-def safe_join_path(path: str, *paths: str):
-    joined_path = path
-    for path_to_join in paths:
-        if not os.path.isdir(joined_path):
-            os.mkdir(joined_path)
-        joined_path = os.path.join(joined_path, path_to_join)
-    return joined_path
 
 
 def main():
@@ -37,8 +26,7 @@ def main():
                             year_number=year,
                             month_number=month
                         ))
-                        with open(file_path, 'w') as f:
-                            json.dump(time_day_list, f)
+                        dump_json_to_file(time_day_list, file_path)
                         print(f'done with {month} month out of {max(months_numbers)} in {year} year')
                     _, shabat_times_list = get_shabat_times(place_number, year, driver)
                     _, moladot_list = get_start_of_months(year, driver)
@@ -46,13 +34,11 @@ def main():
                         place_number=place_number,
                         year_number=year
                     ))
-                    with open(file_path, 'w') as f:
-                        json.dump(shabat_times_list, f)
+                    dump_json_to_file(shabat_times_list, file_path)
                     file_path = safe_join_path(consts.TIMES_FOLDER_FOR_CACHE, consts.MOLADOT_FILE_FORMAT.format(
                         year_number=year
                     ))
-                    with open(file_path, 'w') as f:
-                        json.dump(moladot_list, f)
+                    dump_json_to_file(moladot_list, file_path)
                     print(f'done with {year} year')
                     year += 1
         except NoSuchElementException:
