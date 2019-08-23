@@ -1,9 +1,11 @@
+import os
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
 from selenium import webdriver
 
 import consts
+from consts import TIMES_OUTPUT_FOLDER
 from get_times_from_yeshiva_site import get_times_as_titles_and_times, convert_month_to_month_number, is_year_leaped, \
     get_shabat_times, convert_to_time_of_day, get_start_of_months
 from time_of_day import TimeOfDay
@@ -198,7 +200,10 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
 
     lines_to_write.append(calculate_moladot_of_month(month_moladot))
 
-    with open(consts.TIMES_OUTPUT_FILE_FORMAT.format(month=month, year=year), 'w') as f:
+    with open(os.path.join(
+            consts.TIMES_OUTPUT_FOLDER,
+            consts.TIMES_OUTPUT_FILE_FORMAT.format(month=month, year=year)
+    ), 'w') as f:
         f.write('\n'.join(lines_to_write))
 
 
