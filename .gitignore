@@ -108,6 +108,3 @@ venv.bak/
 
 # csv
 *.csv
-
-# caching
-times_cache/
