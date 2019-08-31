@@ -67,15 +67,19 @@ def add_minutes_to_time(input_time: str, minutes_to_add: int) -> str:
     return ret_time.strftime(consts.TIME_FORMAT)
 
 
-def convert_plag_to_minha(plag_time: str) -> str:
+def convert_plag_to_minha(plag_time: str) -> datetime:
     plag_datetime = datetime.strptime(plag_time, consts.TIME_FORMAT)
     ret_time = plag_datetime - timedelta(minutes=15 + plag_datetime.minute % 15)
-    return ret_time.strftime(consts.TIME_FORMAT)
+    return ret_time
+
+
+def get_min_time_time(friday_times, time_name):
+    return min(friday_time[time_name] for friday_time in friday_times)
 
 
 def calculate_minha_time_according_to_plag(friday_times: List[TimeOfDay]) -> str:
-    plag_min_time = min(friday_time[consts.PLAG] for friday_time in friday_times)
-    return convert_plag_to_minha(plag_min_time)
+    plag_min_time = get_min_time_time(friday_times, consts.PLAG)
+    return convert_plag_to_minha(plag_min_time).strftime(consts.TIME_FORMAT)
 
 
 def convert_to_good_date_format(date_format: str) -> str:
@@ -89,6 +93,12 @@ def calculate_moladot_of_month(month_moladot: TimeOfDay) -> str:
     lines[consts.GOOD_DATE_FORMAT_LINE] = convert_to_good_date_format(lines[consts.GOOD_DATE_FORMAT_LINE])
     del lines[consts.BAD_DATE_FORMAT_LINE]
     return ' '.join(lines)
+
+
+def is_according_to_plag(friday_times: List[TimeOfDay]) -> bool:
+    plag_min_time = get_min_time_time(friday_times, consts.PLAG)
+    minha_according_to_plag = convert_plag_to_minha(plag_min_time)
+    return minha_according_to_plag.hour < consts.HOUR_TO_GO_ACCORDING_TO_SHKIA
 
 
 def convert_by_gimatria(word: str) -> int:
