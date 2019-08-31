@@ -75,7 +75,7 @@ def convert_plag_to_minha(plag_time: str) -> str:
     return ret_time.strftime(consts.TIME_FORMAT)
 
 
-def calculate_minha_time(friday_times: List[TimeOfDay]) -> str:
+def calculate_minha_time_according_to_plag(friday_times: List[TimeOfDay]) -> str:
     plag_min_time = min(friday_time[consts.PLAG] for friday_time in friday_times)
     return convert_plag_to_minha(plag_min_time)
 
@@ -106,7 +106,7 @@ def get_year_from_number(year_number: int) -> str:
     return year
 
 
-def get_fields_to_write(friday_time, shabat_time, shabat_special_time, month, friday_minha_time):
+def get_fields_to_write_according_to_plag(friday_time, shabat_time, shabat_special_time, month, friday_minha_time):
     # פרשות
     yield shabat_special_time[consts.PARASHA]
     # תאריך עברי
@@ -184,10 +184,10 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
             f'friday_times_len == {len(friday_times)}'
         )
 
-    friday_minha_time = calculate_minha_time(friday_times)
+    friday_minha_time = calculate_minha_time_according_to_plag(friday_times)
     lines_to_write = []
     for i in range(len(shabat_times)):
-        lines_to_write.append(consts.SEP.join(get_fields_to_write(
+        lines_to_write.append(consts.SEP.join(get_fields_to_write_according_to_plag(
             friday_times[i],
             shabat_times[i],
             shabat_special_times[i],
