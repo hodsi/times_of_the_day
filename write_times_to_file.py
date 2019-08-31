@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
-from selenium import webdriver
-
 import consts
 from file_utils import safe_join_path
 from get_times_from_yeshiva_site import get_times_as_titles_and_times, convert_month_to_month_number, is_year_leaped, \
@@ -106,6 +104,25 @@ def get_year_from_number(year_number: int) -> str:
     return year
 
 
+def get_fields_titles_according_to_plag():
+    yield 'פרשת השבוע'
+    yield 'תאריך'
+    yield 'תאריך לועזי'
+    yield 'מנחה של שישי'
+    yield 'פלג המנחה'
+    yield 'בואי כלה'
+    yield 'הדלקת נרות'
+    yield 'שקיעה'
+    yield 'שיעור בוקר שבת'
+    yield 'שחרית של שבת'
+    yield 'סוף זמן ק"ש'
+    yield 'אבות ובנים'
+    yield 'שיעור אחה"צ שבת'
+    yield 'מנחה של שבת'
+    yield 'צאת שבת רש"י (גאונים)'
+    yield 'צאת שבת ר"ת'
+
+
 def get_fields_to_write_according_to_plag(friday_time, shabat_time, shabat_special_time, month, friday_minha_time):
     # פרשות
     yield shabat_special_time[consts.PARASHA]
@@ -139,6 +156,18 @@ def get_fields_to_write_according_to_plag(friday_time, shabat_time, shabat_speci
     yield shabat_special_time[consts.SHABAT_END]
     # צאת שבת ר"ת
     yield consts.FIELD_TO_FILL
+
+
+def write_data_to_output(titles_line, fields_lines, moladot_of_month, month, year):
+    lines_to_write = [consts.SEP.join(titles_line)]
+    for fields_line in fields_lines:
+        lines_to_write.append(consts.SEP.join(fields_line))
+    lines_to_write.append(moladot_of_month)
+    with open(safe_join_path(
+            consts.TIMES_OUTPUT_FOLDER,
+            consts.TIMES_OUTPUT_FILE_FORMAT.format(month=month, year=year)
+    ), 'w') as f:
+        f.write('\n'.join(lines_to_write))
 
 
 def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=consts.DEFAULT_YEAR):
@@ -185,23 +214,16 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
         )
 
     friday_minha_time = calculate_minha_time_according_to_plag(friday_times)
-    lines_to_write = []
-    for i in range(len(shabat_times)):
-        lines_to_write.append(consts.SEP.join(get_fields_to_write_according_to_plag(
-            friday_times[i],
-            shabat_times[i],
-            shabat_special_times[i],
-            month,
-            friday_minha_time
-        )))
-
-    lines_to_write.append(calculate_moladot_of_month(month_moladot))
-
-    with open(safe_join_path(
-            consts.TIMES_OUTPUT_FOLDER,
-            consts.TIMES_OUTPUT_FILE_FORMAT.format(month=month, year=year)
-    ), 'w') as f:
-        f.write('\n'.join(lines_to_write))
+    titles_line = get_fields_titles_according_to_plag()
+    fields_lines = (get_fields_to_write_according_to_plag(
+        friday_times[i],
+        shabat_times[i],
+        shabat_special_times[i],
+        month,
+        friday_minha_time
+    ) for i in range(len(shabat_times)))
+    moladot_of_month = calculate_moladot_of_month(month_moladot)
+    write_data_to_output(titles_line, fields_lines, moladot_of_month, month, year)
 
 
 if __name__ == '__main__':
