@@ -1,6 +1,9 @@
 MORNING_LESSON_TIME = '4:30'
 FATHERS_AND_SONS_TIME = '16:15'
 
+FOUR_LINES_TEMPLATE = r'C:\git\times_of_the_day\templates\4_lines_template.docx'
+FIVE_LINES_TEMPLATE = r'C:\git\times_of_the_day\templates\5_lines_template.docx'
+
 HOUR_TO_GO_ACCORDING_TO_SHKIA = 18
 
 DEFAULT_PLACE = 'רמת גן'

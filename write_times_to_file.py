@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
+from docx import Document
+
 import consts
 from file_utils import safe_join_path
 from get_times_from_yeshiva_site import get_times_as_titles_and_times, convert_month_to_month_number, is_year_leaped, \
@@ -197,7 +199,7 @@ def get_fields_titles_according_to_shkia():
     yield 'אבות ובנים'
     yield 'שיעור אחה"צ שבת'
     yield 'מנחה של שבת'
-    yield 'צאת שבת רש"י (גאונים)'
+    yield 'צאת שבת רש"י )גאונים('
     yield 'צאת שבת ר"ת'
 
 
@@ -240,14 +242,24 @@ def get_fields_to_write_according_to_shkia(
 
 
 def write_data_to_output(titles_line, fields_lines, moladot_of_month, month, year):
-    lines_to_write = [consts.SEP.join(titles_line)]
-    for fields_line in fields_lines:
-        lines_to_write.append(consts.SEP.join(fields_line))
-    lines_to_write.append(moladot_of_month)
-    with open(safe_join_path(
-            consts.TIMES_OUTPUT_FOLDER, consts.TIMES_OUTPUT_FILE_FORMAT.format(month=month, year=year)
-    ), 'w') as f:
-        f.write('\n'.join(lines_to_write))
+    fields_lines = [i for i in fields_lines]
+    if len(fields_lines) == 4:
+        document = Document(consts.FOUR_LINES_TEMPLATE)
+    else:
+        document = Document(consts.FIVE_LINES_TEMPLATE)
+
+    document.paragraphs[2].runs[1].text = month
+    document.paragraphs[2].runs[3].text = put_quotes(year)
+    document.paragraphs[3].runs[4].text = add_minutes_to_time(consts.FATHERS_AND_SONS_TIME, -60)
+    document.paragraphs[4].runs[1].text = moladot_of_month
+    table_rows = document.tables[0].rows
+    for i, title in enumerate(titles_line):
+        table_rows[0].cells[i].paragraphs[0].runs[0].text = title
+    for i, fields_line in enumerate(fields_lines):
+        for j, field in enumerate(fields_line):
+            table_rows[i + 1].cells[j].paragraphs[0].runs[0].text = field
+
+    document.save(safe_join_path(consts.TIMES_OUTPUT_FOLDER, f'זמני שבת {month} {year}.docx'))
 
 
 def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=consts.DEFAULT_YEAR):
