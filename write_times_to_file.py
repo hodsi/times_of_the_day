@@ -77,7 +77,7 @@ def convert_plag_to_minha(plag_time: str) -> datetime:
 
 def convert_shkia_to_come_shabat(shkia_time: str) -> datetime:
     shkia_datetime = datetime.strptime(shkia_time, consts.TIME_FORMAT)
-    ret_time = shkia_datetime - timedelta(minutes=15 + shkia_datetime.minute % 15)
+    ret_time = shkia_datetime - timedelta(minutes=30 + shkia_datetime.minute % 15)
     return ret_time
 
 
