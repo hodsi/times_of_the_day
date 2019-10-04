@@ -91,8 +91,8 @@ def calculate_minha_time_according_to_plag(friday_times: List[TimeOfDay]) -> str
 
 
 def calculate_minha_time_according_to_shkia(friday_times: List[TimeOfDay]) -> str:
-    plag_min_time = get_min_time_time(friday_times, consts.SUN_SET)
-    return convert_plag_to_minha(plag_min_time).strftime(consts.TIME_FORMAT)
+    sun_set_min_time = get_min_time_time(friday_times, consts.SUN_SET)
+    return convert_shkia_to_come_shabat(sun_set_min_time).strftime(consts.TIME_FORMAT)
 
 
 def convert_to_good_date_format(date_format: str) -> str:
