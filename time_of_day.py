@@ -87,6 +87,17 @@ class Time(object):
             raise NotImplementedError
         return Time(self._total_minutes // other)
 
+    def __imod__(self, other: int):
+        if not isinstance(other, int):
+            raise NotImplementedError
+        self._total_minutes %= other
+        return self
+
+    def __mod__(self, other):
+        if not isinstance(other, int):
+            raise NotImplementedError
+        return Time(self._total_minutes % other)
+
     def __imul__(self, other: int):
         if not isinstance(other, int):
             raise NotImplementedError
@@ -137,3 +148,10 @@ class Time(object):
             raise NotImplementedError
         return self._total_minutes > other._total_minutes
 
+    @property
+    def minutes(self):
+        return self._total_minutes % MINUTES_IN_HOUR
+
+    @property
+    def hours(self):
+        return self._total_minutes // MINUTES_IN_HOUR
