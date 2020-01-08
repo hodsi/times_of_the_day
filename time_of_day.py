@@ -106,3 +106,34 @@ class Time(object):
 
     def __int__(self):
         return self._total_minutes
+
+    def __lt__(self, other: Time):
+        if not isinstance(other, Time):
+            raise NotImplementedError
+        return self._total_minutes < other._total_minutes
+
+    def __le__(self, other: Time):
+        if not isinstance(other, Time):
+            raise NotImplementedError
+        return self._total_minutes <= other._total_minutes
+
+    def __eq__(self, other: Time):
+        if not isinstance(other, Time):
+            raise NotImplementedError
+        return self._total_minutes == other._total_minutes
+
+    def __ne__(self, other: Time):
+        if not isinstance(other, Time):
+            raise NotImplementedError
+        return self._total_minutes != other._total_minutes
+
+    def __ge__(self, other: Time):
+        if not isinstance(other, Time):
+            raise NotImplementedError
+        return self._total_minutes >= other._total_minutes
+
+    def __gt__(self, other: Time):
+        if not isinstance(other, Time):
+            raise NotImplementedError
+        return self._total_minutes > other._total_minutes
+
