@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from typing import List, Tuple
 
 from docx import Document
@@ -7,7 +6,7 @@ import consts
 from file_utils import safe_join_path
 from get_times_from_yeshiva_site import get_times_as_titles_and_times, convert_month_to_month_number, is_year_leaped, \
     get_shabat_times, convert_to_time_of_day, get_start_of_months
-from time_of_day import TimeOfDay
+from time_of_day import TimeOfDay, Time
 
 
 def get_specific_day_times(day_to_extract: str, time_of_days: List[TimeOfDay]) -> List[TimeOfDay]:
@@ -65,36 +64,30 @@ def is_moladot_time_in_month(moladot_time: TimeOfDay, month: str) -> bool:
     return month == moladot_time[consts.HEBREW_MONTH]
 
 
-def add_minutes_to_time(input_time: str, minutes_to_add: int) -> str:
-    input_datetime = datetime.strptime(input_time, consts.TIME_FORMAT)
-    ret_time = input_datetime + timedelta(minutes=minutes_to_add)
-    return ret_time.strftime(consts.TIME_FORMAT)
+def convert_plag_to_minha(plag_time: Time) -> Time:
+    return plag_time - 15 - plag_time % 15
 
 
-def convert_plag_to_minha(plag_time: str) -> datetime:
-    plag_datetime = datetime.strptime(plag_time, consts.TIME_FORMAT)
-    ret_time = plag_datetime - timedelta(minutes=15 + plag_datetime.minute % 15)
-    return ret_time
+def convert_shkia_to_come_shabat(shkia_time: Time) -> Time:
+    return shkia_time - 30 - shkia_time % 15
 
 
-def convert_shkia_to_come_shabat(shkia_time: str) -> datetime:
-    shkia_datetime = datetime.strptime(shkia_time, consts.TIME_FORMAT)
-    ret_time = shkia_datetime - timedelta(minutes=30 + shkia_datetime.minute % 15)
-    return ret_time
-
-
-def get_min_time(day_times, time_name):
+def get_min_time(day_times: List[TimeOfDay], time_name: str) -> Time:
     return min(day_time[time_name] for day_time in day_times)
 
 
-def calculate_minha_time_according_to_plag(friday_times: List[TimeOfDay]) -> str:
+def get_max_time(day_times: List[TimeOfDay], time_name: str) -> Time:
+    return max(day_time[time_name] for day_time in day_times)
+
+
+def calculate_minha_time_according_to_plag(friday_times: List[TimeOfDay]) -> Time:
     plag_min_time = get_min_time(friday_times, consts.PLAG)
-    return convert_plag_to_minha(plag_min_time).strftime(consts.TIME_FORMAT)
+    return convert_plag_to_minha(plag_min_time)
 
 
-def calculate_minha_time_according_to_shkia(friday_times: List[TimeOfDay]) -> str:
+def calculate_come_shabat_time_according_to_shkia(friday_times: List[TimeOfDay]) -> Time:
     sun_set_min_time = get_min_time(friday_times, consts.SUN_SET)
-    return convert_shkia_to_come_shabat(sun_set_min_time).strftime(consts.TIME_FORMAT)
+    return convert_shkia_to_come_shabat(sun_set_min_time)
 
 
 def convert_to_good_date_format(date_format: str) -> str:
@@ -113,15 +106,30 @@ def calculate_moladot_of_month(month_moladot: TimeOfDay) -> str:
 def is_according_to_plag(friday_times: List[TimeOfDay]) -> bool:
     plag_min_time = get_min_time(friday_times, consts.PLAG)
     minha_according_to_plag = convert_plag_to_minha(plag_min_time)
-    return minha_according_to_plag.hour >= consts.HOUR_TO_GO_ACCORDING_TO_SHKIA
+    return minha_according_to_plag.hours >= consts.HOUR_TO_GO_ACCORDING_TO_SHKIA
 
 
-def get_fathers_and_sons_time(shabat_times: List[TimeOfDay]) -> str:
+def get_fathers_and_sons_time(shabat_times: List[TimeOfDay]) -> Time:
     sun_set_min_time = get_min_time(shabat_times, consts.SUN_SET)
-    noon_lesson_min_time = add_minutes_to_time(sun_set_min_time, -consts.SHABAT_MINHA_TIME_BEFORE_SUN_SET - 30)
-    if noon_lesson_min_time < consts.LATE_FATHERS_AND_SONS_TIME:
-        return consts.EARLY_FATHERS_AND_SONS_TIME
-    return consts.LATE_FATHERS_AND_SONS_TIME
+    sun_set_max_time = get_max_time(shabat_times, consts.SUN_SET)
+    shabat_minha_min_time = sun_set_min_time - consts.SHABAT_MINHA_DURATION
+    shabat_minha_max_time = sun_set_max_time - consts.SHABAT_MINHA_DURATION
+    fathers_and_sons_min_time = (
+            shabat_minha_max_time - consts.NOON_LESSON_MAX_DURATION - consts.FATHERS_AND_SONS_DURATION
+    )
+    fathers_and_sons_max_time = (
+            shabat_minha_min_time - consts.NOON_LESSON_MIN_DURATION - consts.FATHERS_AND_SONS_DURATION
+    )
+    fathers_and_sons_min_time += 15 - fathers_and_sons_min_time % 15
+    fathers_and_sons_max_time -= fathers_and_sons_max_time % 15
+
+    if fathers_and_sons_min_time > fathers_and_sons_max_time:
+        raise Exception(
+            f'fathers and sons min time ({fathers_and_sons_min_time.strftime(consts.TIME_FORMAT)}) '
+            f'was bigger than the max time ({fathers_and_sons_max_time.strftime(consts.TIME_FORMAT)})'
+        )
+
+    return max(fathers_and_sons_max_time - ((shabat_minha_min_time - '15:45') // 30 * 15), fathers_and_sons_min_time)
 
 
 def convert_by_gimatria(word: str) -> int:
@@ -172,7 +180,7 @@ def get_fields_to_write_according_to_plag(
     # פלג המנחה
     yield friday_time[consts.PLAG]
     # בואי כלה
-    yield add_minutes_to_time(friday_minha_time, consts.COME_SHABAT_DIFF_FROM_MINHA_ACCORDING_TO_PLAG)
+    yield friday_minha_time + consts.COME_SHABAT_DIFF_FROM_MINHA_ACCORDING_TO_PLAG
     # הדלקת נרות
     yield shabat_special_time[consts.SHABAT_ENTER]
     # שקיעה
@@ -180,15 +188,15 @@ def get_fields_to_write_according_to_plag(
     # שיעור בוקר שבת
     yield consts.MORNING_LESSON_TIME
     # שחרית של שבת
-    yield add_minutes_to_time(consts.MORNING_LESSON_TIME, consts.MORNING_PRAYER_DIFF_FROM_LESSON)
+    yield Time(consts.MORNING_LESSON_TIME) + consts.MORNING_LESSON_DURATION
     # סוף זמן ק"ש
-    yield ' '.join([shabat_time[consts.FIRST_SHMA], shabat_time[consts.SECOND_SHMA]])
+    yield f'{shabat_time[consts.FIRST_SHMA]} {shabat_time[consts.SECOND_SHMA]}'
     # אבות ובנים
     yield fathers_and_sons_time
     # שיעור אחה"צ שבת
-    yield add_minutes_to_time(fathers_and_sons_time, consts.NOON_LESSON_DIFF_FROM_FATHERS_AND_SONS)
+    yield fathers_and_sons_time + consts.FATHERS_AND_SONS_DURATION
     # מנחה של שבת
-    yield add_minutes_to_time(shabat_time[consts.SUN_SET], -consts.SHABAT_MINHA_TIME_BEFORE_SUN_SET)
+    yield shabat_time[consts.SUN_SET] - consts.SHABAT_MINHA_DURATION
     # צאת שבת רש"י
     yield shabat_special_time[consts.SHABAT_END]
     # צאת שבת ר"ת
@@ -210,14 +218,14 @@ def get_fields_titles_according_to_shkia():
     yield 'אבות ובנים'
     yield 'שיעור אחה"צ שבת'
     yield 'מנחה של שבת'
-    yield 'צאת שבת רש"י )גאונים('
+    yield 'צאת שבת רש"י (גאונים)'
     yield 'צאת שבת ר"ת'
 
 
 def get_fields_to_write_according_to_shkia(
         friday_time, shabat_time, shabat_special_time, month, friday_times, shabat_times
 ):
-    come_shabat_time = calculate_minha_time_according_to_shkia(friday_times)
+    come_shabat_time = calculate_come_shabat_time_according_to_shkia(friday_times)
     fathers_and_sons_time = get_fathers_and_sons_time(shabat_times)
     # פרשות
     yield shabat_special_time[consts.PARASHA]
@@ -228,7 +236,7 @@ def get_fields_to_write_according_to_shkia(
     # בואי כלה
     yield come_shabat_time
     # מנחה של שישי
-    yield add_minutes_to_time(come_shabat_time, -consts.COME_SHABAT_DIFF_FROM_MINHA_ACCORDING_TO_SHKIA)
+    yield come_shabat_time - consts.COME_SHABAT_DIFF_FROM_MINHA_ACCORDING_TO_SHKIA
     # הדלקת נרות
     yield shabat_special_time[consts.SHABAT_ENTER]
     # שקיעה
@@ -238,15 +246,15 @@ def get_fields_to_write_according_to_shkia(
     # שיעור בוקר שבת
     yield consts.MORNING_LESSON_TIME
     # שחרית של שבת
-    yield add_minutes_to_time(consts.MORNING_LESSON_TIME, consts.MORNING_PRAYER_DIFF_FROM_LESSON)
+    yield Time(consts.MORNING_LESSON_TIME) + consts.MORNING_LESSON_DURATION
     # סוף זמן ק"ש
-    yield ' '.join([shabat_time[consts.FIRST_SHMA], shabat_time[consts.SECOND_SHMA]])
+    yield f'{shabat_time[consts.FIRST_SHMA]} {shabat_time[consts.SECOND_SHMA]}'
     # אבות ובנים
     yield fathers_and_sons_time
     # שיעור אחה"צ שבת
-    yield add_minutes_to_time(fathers_and_sons_time, consts.NOON_LESSON_DIFF_FROM_FATHERS_AND_SONS)
+    yield fathers_and_sons_time + consts.FATHERS_AND_SONS_DURATION
     # מנחה של שבת
-    yield add_minutes_to_time(shabat_time[consts.SUN_SET], -consts.SHABAT_MINHA_TIME_BEFORE_SUN_SET)
+    yield shabat_time[consts.SUN_SET] - consts.SHABAT_MINHA_DURATION
     # צאת שבת רש"י
     yield shabat_special_time[consts.SHABAT_END]
     # צאת שבת ר"ת
@@ -262,14 +270,14 @@ def write_data_to_output(titles_line, fields_lines, moladot_of_month, month, yea
 
     document.paragraphs[2].runs[1].text = month
     document.paragraphs[2].runs[3].text = put_quotes(year)
-    document.paragraphs[3].runs[4].text = mishnaiot_time
+    document.paragraphs[3].runs[4].text = str(mishnaiot_time)
     document.paragraphs[4].runs[1].text = moladot_of_month
     table_rows = document.tables[0].rows
     for i, title in enumerate(titles_line):
         table_rows[0].cells[i].paragraphs[0].runs[0].text = title
     for i, fields_line in enumerate(fields_lines):
         for j, field in enumerate(fields_line):
-            table_rows[i + 1].cells[j].paragraphs[0].runs[0].text = field
+            table_rows[i + 1].cells[j].paragraphs[0].runs[0].text = str(field)
 
     document.save(safe_join_path(consts.TIMES_OUTPUT_FOLDER, f'זמני שבת {month} {year}.docx'))
 
@@ -324,9 +332,8 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
         friday_times[i], shabat_times[i], shabat_special_times[i], month, friday_times, shabat_times
     ) for i in range(len(shabat_times)))
     moladot_of_month = calculate_moladot_of_month(month_moladot)
-    mishnaiot_time = add_minutes_to_time(
-        get_fathers_and_sons_time(shabat_times), consts.MISHNAIOT_DIFF_FATHERS_AND_SONS
-    )
+    mishnaiot_time = get_fathers_and_sons_time(shabat_times) - consts.MISHNAIOT_DURATION
+
     write_data_to_output(titles_line, fields_lines, moladot_of_month, month, year, mishnaiot_time)
 
 

@@ -11,10 +11,15 @@ HOURS_IN_DAY = 24
 
 class TimeOfDay(object):
     def __init__(self, times_of_day: List[str], titles: List[str]):
-        self.times_of_day = times_of_day
+        self.times_of_day = []
+        for time_of_day in times_of_day:
+            try:
+                self.times_of_day.append(Time(time_of_day))
+            except (NotImplementedError, ValueError):
+                self.times_of_day.append(time_of_day)
         self.titles = titles
 
-    def __getitem__(self, item: str) -> str:
+    def __getitem__(self, item: str) -> Union[str, Time]:
         return self.times_of_day[self.titles.index(item)]
 
 
