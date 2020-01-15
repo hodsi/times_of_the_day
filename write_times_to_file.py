@@ -145,138 +145,60 @@ def get_year_from_number(year_number: int) -> str:
     return year
 
 
-def get_fields_titles_according_to_plag():
-    yield 'פרשת השבוע'
-    yield 'תאריך'
-    yield 'תאריך לועזי'
-    yield 'מנחה של שישי'
-    yield 'פלג המנחה'
-    yield 'בואי כלה'
-    yield 'הדלקת נרות'
-    yield 'שקיעה'
-    yield 'שיעור בוקר שבת'
-    yield 'שחרית של שבת'
-    yield 'סוף זמן ק"ש'
-    yield 'אבות ובנים'
-    yield 'שיעור אחה"צ שבת'
-    yield 'מנחה של שבת'
-    yield 'צאת שבת רש"י (גאונים)'
-    yield 'צאת שבת ר"ת'
-
-
-def get_fields_to_write_according_to_plag(
-        friday_time, shabat_time, shabat_special_time, month, friday_times, shabat_times
-):
+def get_friday_fields_according_to_plag(friday_time, shabat_time, shabat_special_time, month, friday_times):
     friday_minha_time = calculate_minha_time_according_to_plag(friday_times)
-    fathers_and_sons_time = get_fathers_and_sons_time(shabat_times)
-    # פרשות
-    yield shabat_special_time[consts.PARASHA]
-    # תאריך עברי
-    yield get_date_string(shabat_time[consts.DAY_IN_MONTH], month)
-    # תאריך לועזי
-    yield shabat_time[consts.WEIRD_DATE]
-    # מנחה של שישי
-    yield friday_minha_time
-    # פלג המנחה
-    yield friday_time[consts.PLAG]
-    # בואי כלה
-    yield friday_minha_time + consts.COME_SHABAT_DIFF_FROM_MINHA_ACCORDING_TO_PLAG
-    # הדלקת נרות
-    yield shabat_special_time[consts.SHABAT_ENTER]
-    # שקיעה
-    yield friday_time[consts.SUN_SET]
-    # שיעור בוקר שבת
-    yield consts.MORNING_LESSON_TIME
-    # שחרית של שבת
-    yield Time(consts.MORNING_LESSON_TIME) + consts.MORNING_LESSON_DURATION
-    # סוף זמן ק"ש
-    yield f'{shabat_time[consts.FIRST_SHMA]} {shabat_time[consts.SECOND_SHMA]}'
-    # אבות ובנים
-    yield fathers_and_sons_time
-    # שיעור אחה"צ שבת
-    yield fathers_and_sons_time + consts.FATHERS_AND_SONS_DURATION
-    # מנחה של שבת
-    yield shabat_time[consts.SUN_SET] - consts.SHABAT_MINHA_DURATION
-    # צאת שבת רש"י
-    yield shabat_special_time[consts.SHABAT_END]
-    # צאת שבת ר"ת
-    yield consts.FIELD_TO_FILL
+    yield 'פרשת השבוע', shabat_special_time[consts.PARASHA]
+    yield 'תאריך', get_date_string(shabat_time[consts.DAY_IN_MONTH], month)
+    yield 'תאריך לועזי', shabat_time[consts.WEIRD_DATE]
+    yield 'מנחה של שישי', friday_minha_time
+    yield 'פלג המנחה', friday_time[consts.PLAG]
+    yield 'בואי כלה', friday_minha_time + consts.COME_SHABAT_DIFF_FROM_MINHA_ACCORDING_TO_PLAG
+    yield 'הדלקת נרות', shabat_special_time[consts.SHABAT_ENTER]
+    yield 'שקיעה', friday_time[consts.SUN_SET]
 
 
-def get_fields_titles_according_to_shkia():
-    yield 'פרשת השבוע'
-    yield 'תאריך'
-    yield 'תאריך לועזי'
-    yield 'בואי כלה'
-    yield 'מנחה של שישי'
-    yield 'הדלקת נרות'
-    yield 'שקיעה'
-    yield 'צאת הכוכבים'
-    yield 'שיעור בוקר שבת'
-    yield 'שחרית של שבת'
-    yield 'סוף זמן ק"ש'
-    yield 'אבות ובנים'
-    yield 'שיעור אחה"צ שבת'
-    yield 'מנחה של שבת'
-    yield 'צאת שבת רש"י (גאונים)'
-    yield 'צאת שבת ר"ת'
-
-
-def get_fields_to_write_according_to_shkia(
-        friday_time, shabat_time, shabat_special_time, month, friday_times, shabat_times
-):
+def get_friday_fields_according_to_shkia(friday_time, shabat_time, shabat_special_time, month, friday_times):
     come_shabat_time = calculate_come_shabat_time_according_to_shkia(friday_times)
+    yield 'פרשת השבוע', shabat_special_time[consts.PARASHA]
+    yield 'תאריך', get_date_string(shabat_time[consts.DAY_IN_MONTH], month)
+    yield 'תאריך לועזי', shabat_time[consts.WEIRD_DATE]
+    yield 'בואי כלה', come_shabat_time
+    yield 'מנחה של שישי', come_shabat_time - consts.COME_SHABAT_DIFF_FROM_MINHA_ACCORDING_TO_SHKIA
+    yield 'הדלקת נרות', shabat_special_time[consts.SHABAT_ENTER]
+    yield 'שקיעה', friday_time[consts.SUN_SET]
+    yield 'צאת הכוכבים', friday_time[consts.STARS_OUT]
+
+
+def get_shabat_fields(shabat_time, shabat_special_time, shabat_times):
     fathers_and_sons_time = get_fathers_and_sons_time(shabat_times)
-    # פרשות
-    yield shabat_special_time[consts.PARASHA]
-    # תאריך עברי
-    yield get_date_string(shabat_time[consts.DAY_IN_MONTH], month)
-    # תאריך לועזי
-    yield shabat_time[consts.WEIRD_DATE]
-    # בואי כלה
-    yield come_shabat_time
-    # מנחה של שישי
-    yield come_shabat_time - consts.COME_SHABAT_DIFF_FROM_MINHA_ACCORDING_TO_SHKIA
-    # הדלקת נרות
-    yield shabat_special_time[consts.SHABAT_ENTER]
-    # שקיעה
-    yield friday_time[consts.SUN_SET]
-    # צאת הכוכבים
-    yield friday_time[consts.STARS_OUT]
-    # שיעור בוקר שבת
-    yield consts.MORNING_LESSON_TIME
-    # שחרית של שבת
-    yield Time(consts.MORNING_LESSON_TIME) + consts.MORNING_LESSON_DURATION
-    # סוף זמן ק"ש
-    yield f'{shabat_time[consts.FIRST_SHMA]} {shabat_time[consts.SECOND_SHMA]}'
-    # אבות ובנים
-    yield fathers_and_sons_time
-    # שיעור אחה"צ שבת
-    yield fathers_and_sons_time + consts.FATHERS_AND_SONS_DURATION
-    # מנחה של שבת
-    yield shabat_time[consts.SUN_SET] - consts.SHABAT_MINHA_DURATION
-    # צאת שבת רש"י
-    yield shabat_special_time[consts.SHABAT_END]
-    # צאת שבת ר"ת
-    yield consts.FIELD_TO_FILL
+    yield 'שיעור בוקר שבת', consts.MORNING_LESSON_TIME
+    yield 'שחרית של שבת', Time(consts.MORNING_LESSON_TIME) + consts.MORNING_LESSON_DURATION
+    yield 'סוף זמן ק"ש', f'{shabat_time[consts.FIRST_SHMA]} {shabat_time[consts.SECOND_SHMA]}'
+    yield 'אבות ובנים', fathers_and_sons_time
+    yield 'שיעור אחה"צ שבת', fathers_and_sons_time + consts.FATHERS_AND_SONS_DURATION
+    yield 'מנחה של שבת', shabat_time[consts.SUN_SET] - consts.SHABAT_MINHA_DURATION
+    yield 'צאת שבת רש"י )גאונים(', shabat_special_time[consts.SHABAT_END]
+    yield 'צאת שבת ר"ת', consts.FIELD_TO_FILL
 
 
-def write_data_to_output(titles_line, fields_lines, moladot_of_month, month, year, mishnaiot_time):
-    fields_lines = [i for i in fields_lines]
+def write_data_to_output(fields_lines, moladot_of_month, month, year, mishnaiot_time):
+    titles = next(zip(*fields_lines[0]))
     if len(fields_lines) == 4:
         document = Document(consts.FOUR_LINES_TEMPLATE)
-    else:
+    elif len(fields_lines) == 5:
         document = Document(consts.FIVE_LINES_TEMPLATE)
+    else:
+        raise Exception(f'their are {len(fields_lines)} shabats on the month')
 
     document.paragraphs[2].runs[1].text = month
     document.paragraphs[2].runs[3].text = put_quotes(year)
     document.paragraphs[3].runs[4].text = str(mishnaiot_time)
     document.paragraphs[4].runs[1].text = moladot_of_month
     table_rows = document.tables[0].rows
-    for i, title in enumerate(titles_line):
+    for i, title in enumerate(titles):
         table_rows[0].cells[i].paragraphs[0].runs[0].text = title
     for i, fields_line in enumerate(fields_lines):
-        for j, field in enumerate(fields_line):
+        for j, (_, field) in enumerate(fields_line):
             table_rows[i + 1].cells[j].paragraphs[0].runs[0].text = str(field)
 
     document.save(safe_join_path(consts.TIMES_OUTPUT_FOLDER, f'זמני שבת {month} {year}.docx'))
@@ -321,20 +243,22 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
         )
 
     if is_according_to_plag(friday_times):
-        get_titles = get_fields_titles_according_to_plag
-        get_fields = get_fields_to_write_according_to_plag
+        get_friday_fields = get_friday_fields_according_to_plag
     else:
-        get_titles = get_fields_titles_according_to_shkia
-        get_fields = get_fields_to_write_according_to_shkia
+        get_friday_fields = get_friday_fields_according_to_shkia
 
-    titles_line = get_titles()
-    fields_lines = (get_fields(
-        friday_times[i], shabat_times[i], shabat_special_times[i], month, friday_times, shabat_times
+    friday_fields_lines = (get_friday_fields(
+        friday_times[i], shabat_times[i], shabat_special_times[i], month, friday_times
     ) for i in range(len(shabat_times)))
+    shabat_fields_lines = (
+        get_shabat_fields(shabat_times[i], shabat_special_times[i], shabat_times) for i in range(len(shabat_times))
+    )
+    fields_lines = [[*friday_fields, *shabat_fields] for friday_fields, shabat_fields
+                    in zip(friday_fields_lines, shabat_fields_lines)]
     moladot_of_month = calculate_moladot_of_month(month_moladot)
     mishnaiot_time = get_fathers_and_sons_time(shabat_times) - consts.MISHNAIOT_DURATION
 
-    write_data_to_output(titles_line, fields_lines, moladot_of_month, month, year, mishnaiot_time)
+    write_data_to_output(fields_lines, moladot_of_month, month, year, mishnaiot_time)
 
 
 if __name__ == '__main__':
