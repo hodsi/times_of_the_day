@@ -235,6 +235,8 @@ def main(place=consts.DEFAULT_PLACE, month=consts.DEFAULT_MONTH, year_number=con
         ))
         last_month_friday_times = get_specific_day_times(consts.FRIDAY, last_month_times)
         friday_times = [last_month_friday_times[-1], *friday_times]
+    if len(friday_times) - len(shabat_times) == 1:
+        friday_times = friday_times[:-1]
 
     if not len(shabat_times) == len(shabat_special_times) == len(friday_times):
         raise Exception(
